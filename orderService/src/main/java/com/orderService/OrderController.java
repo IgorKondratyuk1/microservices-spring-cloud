@@ -1,5 +1,8 @@
 package com.orderService;
 
+import com.orderService.dto.CreateOrderDto;
+import com.orderService.dto.OrderDto;
+import com.orderService.dto.OrderWithProductsDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,14 +27,19 @@ public class OrderController {
         return orderService.getById(id);
     }
 
+    @GetMapping("/{id}/products")
+    public OrderWithProductsDto getOrderWithProductsById(@PathVariable Long id) {
+        return orderService.getOrderWithProductsById(id);
+    }
+
     @PostMapping
-    public ResponseEntity<OrderDto> create(@RequestBody OrderDto dto) {
+    public ResponseEntity<OrderDto> create(@RequestBody CreateOrderDto dto) {
         OrderDto created = orderService.create(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @PutMapping("/{id}")
-    public OrderDto update(@PathVariable Long id, @RequestBody OrderDto dto) {
+    public OrderDto update(@PathVariable Long id, @RequestBody CreateOrderDto dto) {
         return orderService.update(id, dto);
     }
 

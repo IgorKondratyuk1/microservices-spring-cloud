@@ -1,9 +1,15 @@
 package com.orderService;
 
+import com.orderService.client.ProductClient;
+import com.orderService.dto.CreateOrderDto;
+import com.orderService.dto.OrderDto;
+import com.orderService.dto.OrderWithProductsDto;
+import com.orderService.client.ProductDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -11,6 +17,7 @@ import java.util.List;
 public class OrderService {
 
     private final OrderRepository orderRepository;
+    private final ProductClient productClient;
 
     public List<OrderDto> getAll() {
         return orderRepository.findAll().stream()
@@ -22,7 +29,20 @@ public class OrderService {
         return toDto(findById(id));
     }
 
-    public OrderDto create(OrderDto dto) {
+    public OrderWithProductsDto getOrderWithProductsById(Long id) {
+        OrderEntity orderEntity = findById(id);
+        List<ProductDto> productDtos = new ArrayList<>();
+
+        orderEntity.getProductIds().forEach(productId -> {
+            ProductDto productDto = productClient.getById(productId);
+            System.out.println(productDto);
+            productDtos.add(productDto);
+        });
+        
+        return toWithProductsDto(orderEntity, productDtos);
+    }
+
+    public OrderDto create(CreateOrderDto dto) {
         OrderEntity entity = new OrderEntity();
         entity.setStatus(dto.status());
         entity.setTotalAmount(dto.totalAmount());
@@ -31,7 +51,7 @@ public class OrderService {
         return toDto(orderRepository.save(entity));
     }
 
-    public OrderDto update(Long id, OrderDto dto) {
+    public OrderDto update(Long id, CreateOrderDto dto) {
         OrderEntity entity = findById(id);
         entity.setStatus(dto.status());
         entity.setTotalAmount(dto.totalAmount());
@@ -53,8 +73,17 @@ public class OrderService {
                 entity.getId(),
                 entity.getCreatedAt(),
                 entity.getStatus(),
+                entity.getTotalAmount()
+        );
+    }
+
+    private OrderWithProductsDto toWithProductsDto(OrderEntity entity, List<ProductDto> productDtos) {
+        return new OrderWithProductsDto(
+                entity.getId(),
+                entity.getCreatedAt(),
+                entity.getStatus(),
                 entity.getTotalAmount(),
-                entity.getProductIds()
+                productDtos
         );
     }
 }
