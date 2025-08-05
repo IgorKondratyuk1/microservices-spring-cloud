@@ -1,15 +1,15 @@
-package com.orderService;
+package com.orderService.service;
 
-import com.orderService.client.ProductClient;
+import com.orderService.client.ProductDto;
 import com.orderService.dto.CreateOrderDto;
 import com.orderService.dto.OrderDto;
 import com.orderService.dto.OrderWithProductsDto;
-import com.orderService.client.ProductDto;
+import com.orderService.entity.OrderEntity;
+import com.orderService.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -17,7 +17,7 @@ import java.util.List;
 public class OrderService {
 
     private final OrderRepository orderRepository;
-    private final ProductClient productClient;
+    private final OrderProductService orderProductService;
 
     public List<OrderDto> getAll() {
         return orderRepository.findAll().stream()
@@ -31,14 +31,7 @@ public class OrderService {
 
     public OrderWithProductsDto getOrderWithProductsById(Long id) {
         OrderEntity orderEntity = findById(id);
-        List<ProductDto> productDtos = new ArrayList<>();
-
-        orderEntity.getProductIds().forEach(productId -> {
-            ProductDto productDto = productClient.getById(productId);
-            System.out.println(productDto);
-            productDtos.add(productDto);
-        });
-        
+        List<ProductDto> productDtos = this.orderProductService.findProductsForOrder(id);
         return toWithProductsDto(orderEntity, productDtos);
     }
 
@@ -47,7 +40,6 @@ public class OrderService {
         entity.setStatus(dto.status());
         entity.setTotalAmount(dto.totalAmount());
         entity.setCreatedAt(LocalDateTime.now());
-        entity.setProductIds(dto.productIds());
         return toDto(orderRepository.save(entity));
     }
 
@@ -55,7 +47,6 @@ public class OrderService {
         OrderEntity entity = findById(id);
         entity.setStatus(dto.status());
         entity.setTotalAmount(dto.totalAmount());
-        entity.setProductIds(dto.productIds());
         return toDto(orderRepository.save(entity));
     }
 

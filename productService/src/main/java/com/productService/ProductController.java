@@ -1,5 +1,7 @@
 package com.productService;
 
+import com.productService.dto.GetByIdsDto;
+import com.productService.dto.ProductDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +24,11 @@ public class ProductController {
     @GetMapping("/{id}")
     public ProductDto getById(@PathVariable Long id) {
         return productService.getById(id);
+    }
+
+    @PostMapping("/search/ids")
+    public List<ProductDto> getAllByIds(@RequestBody GetByIdsDto getByIdsDto) {
+        return productService.getByIds(getByIdsDto.productIds());
     }
 
     @PostMapping

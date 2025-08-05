@@ -1,5 +1,6 @@
 package com.productService;
 
+import com.productService.dto.ProductDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +21,12 @@ public class ProductService {
 
     public ProductDto getById(Long id) {
         return toDto(findById(id));
+    }
+
+    public List<ProductDto> getByIds(List<Long> ids) {
+        return this.productRepository.findAllById(ids).stream()
+                .map(productEntity -> toDto(productEntity))
+                .toList();
     }
 
     public ProductDto create(ProductDto dto) {
